@@ -52,9 +52,9 @@ image::graph.png[{image-60-width}]
 
 == вообще любая очередь.
 
-image::mausoleum.jpg[{image-80-width}]
+image::london-queue.jpg[{image-60-width}]
 
-== Модель
+== Параметры модели
 
 * Cредняя частота возникновения событий -- &lambda;, 
 * Средняя пропускная способность обработчика -- &mu;
@@ -70,7 +70,7 @@ image::whynot.png[{image-60-width}]
 
 == Наливаем себе пивко, начинается матан
 //https://pxhere.com/en/photo/1580863
-image::beers.jpg[{image-60-width}]
+image::beers.jpg[{image-70-width}]
 
 == Модель (самая простая)
 
@@ -153,6 +153,11 @@ image::kitten-2.jpg[{image-30-width},align="left"]
 
 == При стационарном поведении системы
 
+
+
+[cols="60a,40a"]
+|===
+|
 [graphviz, "markov.png"]
 -----
 digraph G {
@@ -169,9 +174,6 @@ digraph G {
 }
 -----
 
-[cols="60a,40a"]
-|===
-|
 [stem] 
 ++++
 \huge
@@ -238,13 +240,13 @@ image::graph.png[{image-60-width}]
 
 == Нестабильный режим 
 
-&mu; < &lambda; (нам конец)
+&mu; < &lambda; или &mu; = &lambda; (нам конец)
 
 image::othergraph-1.png[{image-60-width}]
 
 == Режим с малым ожиданием в очереди (и малой загрузкой процессора)
 
-&mu; >> &lambda; (очереди нет, но и процессор ничего не делает) 
+&mu; >> &lambda; (очереди нет, но и процессор часто простаивает) 
 
 image::othergraph-2.png[{image-60-width}]
 
