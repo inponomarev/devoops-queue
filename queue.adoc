@@ -1,0 +1,270 @@
+= О графике из книги «Проект Феникс»
+Иван Пономарёв, КУРС/МФТИ
+:revealjs_transition: none
+:revealjs_theme: black
+:revealjs_customtheme: white_course.css
+:revealjs_slideNumber:
+:revealjs_history:
+:revealjs_progress:
+:encoding: UTF-8
+:lang: ru
+include::_doc_general_attributes.adoc[]
+:doctype: article
+:toclevels: 3
+:imagesdir: images
+:source-highlighter: highlightjs
+:highlightjsdir: highlight
+:icons: font
+:iconfont-remote!:
+:iconfont-name: font-awesome-4.7.0/css/font-awesome
+:revealjs_mouseWheel: true
+:revealjs_center: false
+:revealjs_width: 1600
+:revealjs_height: 900
+:stem: latexmath
+
+//== Часть 1. Введение
+:!figure-caption:
+
+ponomarev@corchestra.ru
+
+icon:twitter[size=lg] @inponomarev
+
+== Кто читал эту книжку?
+
+image::phoenix.jpg[{image-30-width}]
+
+== А кто знает, про что эта картинка?
+
+image::graph.png[{image-60-width}]
+
+== WTF?
+
+* Как так вышло, что чем «оптимальнее» загружен процессор, тем медленнее идёт процесс?
+* И почему всё настолько плохо возле точки 100% загрузки процессора?
+
+== Любая очередь есть моделируемый процесс, подчиняющийся общим закономерностям
+
+[%step]
+* Очередь из сообщений в топике Kafka,
+* очередь задач в вашей Жире,
+* очередь на кассу в магазин,
+
+== вообще любая очередь.
+
+image::mausoleum.jpg[{image-80-width}]
+
+== Модель
+
+* Cредняя частота возникновения событий -- &lambda;, 
+* Средняя пропускная способность обработчика -- &mu;
+* Загруженность обработчика -- stem:[\rho=\frac{\lambda}{\mu}]
+
+== Получаем такую картинку
+
+image::othergraph.png[{image-60-width}]
+
+== Но почему не такую??
+
+image::whynot.png[{image-60-width}]
+
+== Наливаем себе пивко, начинается матан
+//https://pxhere.com/en/photo/1580863
+image::beers.jpg[{image-60-width}]
+
+== Модель (самая простая)
+
+* События становятся в очередь в случайные моменты времени с распределением Пуассона,
+* Обработчик событий затрачивает случайное время с экспоненциальным распределением,
+* Система может находиться в счётном количестве состояний:
+
+
+[graphviz, "markov.png"]
+-----
+digraph G {
+  graph [ dpi = 150 ]; 
+  rankdir="LR"
+  node[shape="circle"; fixedsize="true"; width=".6"]
+  "0" -> "1"[label="&lambda;"]
+  "1" -> "0"[label="&mu;"]
+  "1" -> "2"[label="&lambda;"]
+  "2" -> "1"[label="&mu;"]
+  "2" -> "n"[style="invis"]
+  "n" -> "n+1"[label="&lambda;"]
+  "n+1" -> "n"[label="&mu;"]
+}
+-----
+
+== Вероятность нахождения в состоянии _n_ в момент времени _t_
+
+[graphviz, "markov.png"]
+-----
+digraph G {
+  graph [ dpi = 180 ]; 
+  rankdir="LR"
+  node[shape="circle"; fixedsize="true"; width=".6"]
+  "0" -> "1"[label="&lambda;"]
+  "1" -> "0"[label="&mu;"]
+  "1" -> "2"[label="&lambda;"]
+  "2" -> "1"[label="&mu;"]
+  "2" -> "n"[style="invis"]
+  "n" -> "n+1"[label="&lambda;"]
+  "n+1" -> "n"[label="&mu;"]
+}
+-----
+
+[stem] 
+++++
+\huge
+\begin{array}{rcl}
+p_0(t+\Delta t) & = & (1 - \lambda \Delta t) p_0(t) + \mu \Delta t p_1(t) + o(\Delta t), \\ 
+p_n(t+\Delta t) & = & \lambda \Delta t p_{n-1}(t) + (1 - (\lambda +\mu)\Delta t) p_n(t) \\
+& & + \mu \Delta t p_{n+1}(t) + o(\Delta t). \end{array}
+++++
+
+image::kitten-1.jpg[{image-20-width},align="right"]
+
+== При Δt -> 0
+[graphviz, "markov.png"]
+-----
+digraph G {
+  graph [ dpi = 180 ]; 
+  rankdir="LR"
+  node[shape="circle"; fixedsize="true"; width=".6"]
+  "0" -> "1"[label="&lambda;"]
+  "1" -> "0"[label="&mu;"]
+  "1" -> "2"[label="&lambda;"]
+  "2" -> "1"[label="&mu;"]
+  "2" -> "n"[style="invis"]
+  "n" -> "n+1"[label="&lambda;"]
+  "n+1" -> "n"[label="&mu;"]
+}
+-----
+
+[stem] 
+++++
+\huge
+\begin{array}{rcl}
+p'_0(t) & = &  - \lambda p_0(t) + \mu p_1(t),\\ 
+p'_n(t) & = & \lambda  p_{n-1}(t) - (\lambda +\mu) p_n(t) + \mu p_{n+1}(t)  \end{array}
+++++
+
+image::kitten-2.jpg[{image-30-width},align="left"]
+
+== При стационарном поведении системы
+
+[graphviz, "markov.png"]
+-----
+digraph G {
+  graph [ dpi = 180 ]; 
+  rankdir="LR"
+  node[shape="circle"; fixedsize="true"; width=".6"]
+  "0" -> "1"[label="&lambda;"]
+  "1" -> "0"[label="&mu;"]
+  "1" -> "2"[label="&lambda;"]
+  "2" -> "1"[label="&mu;"]
+  "2" -> "n"[style="invis"]
+  "n" -> "n+1"[label="&lambda;"]
+  "n+1" -> "n"[label="&mu;"]
+}
+-----
+
+[cols="60a,40a"]
+|===
+|
+[stem] 
+++++
+\huge
+\begin{array}{rcl}
+0 & = &  - \lambda p_0 + \mu p_1,\\ 
+0 & = & \lambda  p_{n-1} - (\lambda +\mu) p_n + \mu p_{n+1},\\ 
+1 & = & \sum\limits_{n=0}^{\infty}p_n
+\end{array}
+++++
+|
+image::kitten-4.jpg[{image-70-width},align="right"]
+|===
+
+== Решение всей системы
+
+[stem] 
+++++
+\Huge
+\begin{array}
+&p_n=(1-\rho)\rho^n,\\
+n = 0,1,2\ldots, \quad \rho = \frac{\lambda}{\mu}
+\end{array}
+++++
+
+image::kitten-5.jpg[{image-40-width},align="center"]
+
+
+== Средняя длина очереди?
+[stem] 
+++++
+\Huge
+\begin{array}
+&E(L) = \sum\limits_{n=0}^{\infty}n p_n = \rho(1-\rho)\sum\limits_{n=0}^{\infty}n \rho_{n-1}=\\ 
+= \frac{\rho}{1- \rho}.
+\end{array}
+++++
+
+image::kitten-3.jpg[{image-30-width},align="center"]
+
+== Итак...
+
+[stem] 
+++++
+\Huge
+E(L) = \frac{\rho}{1- \rho}.
+++++
+
+== Но ведь это...
+
+image::graph.png[{image-60-width}]
+
+== На пальцах это можно объяснить как-то так
+
+[cols="50a,50a"]
+|===
+|image::gates.jpg[]
+|image::othergraph.png[]
+|===
+
+== Выводы
+
+Любая система с очередью может находиться в одном из трёх режимов
+
+
+== Нестабильный режим 
+
+&mu; < &lambda; (нам конец)
+
+image::othergraph-1.png[{image-60-width}]
+
+== Режим с малым ожиданием в очереди (и малой загрузкой процессора)
+
+&mu; >> &lambda; (очереди нет, но и процессор ничего не делает) 
+
+image::othergraph-2.png[{image-60-width}]
+
+== Возле точки насыщения
+
+* &mu; > &lambda;, но ненамного!
+
+image::othergraph-3.png[{image-60-width}]
+
+== Главный вывод
+
+Оптимизация процессора и оптимизация потока -- это «качели»: оптимизируя поток, мы должны лимитировать загрузку процессора.
+
+image::seesaw.jpg[{image-50-width}]
+
+== У меня всё!
+
+* icon:twitter[size=lg]  @inponomarev
+{nbsp} +
+* icon:envelope[size=lg] ponomarev@corchestra.ru
+{nbsp} +
+
+image::seesaw.jpg[{image-30-width}]
