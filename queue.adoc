@@ -206,7 +206,7 @@ image::kitten-5.jpg[{image-40-width},align="center"]
 ++++
 \Huge
 \begin{array}
-&E(L) = \sum\limits_{n=0}^{\infty}n p_n = \rho(1-\rho)\sum\limits_{n=0}^{\infty}n \rho_{n-1}=\\ 
+&E(L) = \sum\limits_{n=0}^{\infty}n p_n = \rho(1-\rho)\sum\limits_{n=0}^{\infty}n \rho^{n-1}=\\ 
 = \frac{\rho}{1- \rho}.
 \end{array}
 ++++
